@@ -1,14 +1,22 @@
 package org.example;
 
+import lombok.Data;
+
+@Data
 public class ElevatorFactory {
 
     private final Elevator e1;
     private final Elevator e2;
 
+    private final int floorsCount;
+    private final int elevatorMovingDelayInMillis;
+
     private final Thread e1Thread;
     private final Thread e2Thread;
 
     public ElevatorFactory(int floorsCount, int elevatorMovingDelayInMillis) {
+        this.floorsCount = floorsCount;
+        this.elevatorMovingDelayInMillis = elevatorMovingDelayInMillis;
         e1 = new Elevator(1, floorsCount, elevatorMovingDelayInMillis);
         e2 = new Elevator(2, floorsCount, elevatorMovingDelayInMillis);
         e1Thread = new Thread(() -> {
@@ -41,21 +49,36 @@ public class ElevatorFactory {
         if (e1HandleResponse == e2HandleResponse) {
             if (e1.getCurrentCapacity() < e2.getCurrentCapacity()) {
                 e1.invoke(query);
+                System.out.println("First elevator accepted query " + query);
             } else {
                 e2.invoke(query);
+                System.out.println("Second elevator accepted query " + query);
             }
         }
         else if (e1HandleResponse < e2HandleResponse) {
             e1.invoke(query);
+            System.out.println("First elevator accepted query " + query);
         }
         else {
             e2.invoke(query);
+            System.out.println("Second elevator accepted query " + query);
         }
     }
 
     public void runElevators() {
         e1Thread.start();
         e2Thread.start();
+    }
+
+    public void stopElevators() {
+        try {
+            e1Thread.join();
+            e2Thread.join();
+        } catch (InterruptedException e) {
+            System.out.println(e.getMessage());
+            e1Thread.interrupt();
+            e2Thread.interrupt();
+        }
     }
 
 }

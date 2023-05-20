@@ -1,16 +1,20 @@
 package org.example;
 
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
-    public static void main(String[] args){
-        Scanner in = new Scanner(System.in);
+    public static void main(String[] args) throws InterruptedException {
         ElevatorFactory elevatorFactory = new ElevatorFactory(20, 1000);
         elevatorFactory.runElevators();
-        while (true) {
-            Query q = new Query(in.nextInt(), in.nextInt());
-            elevatorFactory.sendQuery(q);
-        }
+
+        QueryFactory queryFactory = new QueryFactory(elevatorFactory, 3000);
+        queryFactory.startSendingQueries();
+
+        TimeUnit.SECONDS.sleep(5);
+
+        queryFactory.stopSendingQueries();
+        elevatorFactory.stopElevators();
     }
 }
