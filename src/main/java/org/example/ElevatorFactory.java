@@ -14,6 +14,8 @@ public class ElevatorFactory {
     private final Thread e1Thread;
     private final Thread e2Thread;
 
+    private boolean isStopped = false;
+
     public ElevatorFactory(int floorsCount, int elevatorMovingDelayInMillis) {
         this.floorsCount = floorsCount;
         this.elevatorMovingDelayInMillis = elevatorMovingDelayInMillis;
@@ -23,6 +25,9 @@ public class ElevatorFactory {
             while (!Thread.interrupted()) {
                 try {
                     e1.start();
+                    if (e1.getCurrentCapacity() == 0 && isStopped) {
+                        break;
+                    }
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -32,6 +37,9 @@ public class ElevatorFactory {
             while (!Thread.interrupted()) {
                 try {
                     e2.start();
+                    if (e2.getCurrentCapacity() == 0 && isStopped) {
+                        break;
+                    }
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -40,6 +48,8 @@ public class ElevatorFactory {
     }
 
     public void sendQuery(Query query) {
+        if (isStopped) return;
+
         int e1HandleResponse = e1.canHandle(query);
         int e2HandleResponse = e2.canHandle(query);
         if (e1HandleResponse == -2 || e2HandleResponse == -2) {
@@ -71,14 +81,6 @@ public class ElevatorFactory {
     }
 
     public void stopElevators() {
-        try {
-            e1Thread.join();
-            e2Thread.join();
-        } catch (InterruptedException e) {
-            System.out.println(e.getMessage());
-            e1Thread.interrupt();
-            e2Thread.interrupt();
-        }
+        isStopped = true;
     }
-
 }
